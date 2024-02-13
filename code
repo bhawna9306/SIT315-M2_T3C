@@ -1,78 +1,59 @@
-const int pirSensorPin = 2;          // Digital input pin for PIR sensor
-const int ultrasonicTrigPin = 9;     // Digital output pin for ultrasonic sensor trigger
-const int ultrasonicEchoPin = 10;    // Digital input pin for ultrasonic sensor echo
+const int pirSensorPin1 = 2;          // Digital input pin for PIR sensor 1
+const int pirSensorPin2 = 3;          // Digital input pin for PIR sensor 2
 const int pirLedPin = 13;             // Digital output pin for PIR sensor LED
-const int ultrasonicLedPin = 12;     // Digital output pin for ultrasonic sensor LED
+const int pirLedPin2 = 12;            // Digital output pin for PIR sensor 2 LED
 
-volatile int motionFlag = 0;
-volatile int ultrasonicFlag = 0;
+volatile int motionFlag1 = 0;
+volatile int motionFlag2 = 0;
 
 void setup() {
   Serial.begin(9600);
-  pinMode(ultrasonicTrigPin, OUTPUT);
-  pinMode(ultrasonicEchoPin, INPUT);
+  pinMode(pirSensorPin1, INPUT);
+  pinMode(pirSensorPin2, INPUT);
   pinMode(pirLedPin, OUTPUT);
-  pinMode(ultrasonicLedPin, OUTPUT);
+  pinMode(pirLedPin2, OUTPUT);
 
-  //  interrupt for the PIR sensor
-  attachInterrupt(digitalPinToInterrupt(pirSensorPin), pirMotionDetected, RISING);
+  // Attach interrupts for PIR sensors
+  attachInterrupt(digitalPinToInterrupt(pirSensorPin1), pirMotionDetected1, RISING);
+  attachInterrupt(digitalPinToInterrupt(pirSensorPin2), pirMotionDetected2, RISING);
 }
 
 void loop() {
-  ultrasonicDetected();
+
 }
 
-void pirMotionDetected() {
-  motionFlag = 1;
+void pirMotionDetected1() {
+  motionFlag1 = 1;
   checkAndHandleFlags();
 }
 
-void ultrasonicDetected() {
-
-  long duration, distance;
-  
-  digitalWrite(ultrasonicTrigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(ultrasonicTrigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(ultrasonicTrigPin, LOW);
-  
-  duration = pulseIn(ultrasonicEchoPin, HIGH);
-  distance = duration * 0.034 / 2;
-
-  //  distance threshold 
-  if (distance < 20) {
-    ultrasonicFlag = 1;
-    checkAndHandleFlags();
-  }
+void pirMotionDetected2() {
+  motionFlag2 = 1;
+  checkAndHandleFlags();
 }
 
 void checkAndHandleFlags() {
-  if (motionFlag) {
-    digitalWrite(pirLedPin, HIGH);  // Turn on PIR sensor LED
-    Serial.println("Motion detected!");
-
-   
+  if (motionFlag1) {
+    digitalWrite(pirLedPin, HIGH);  // Turn on PIR sensor 1 LED
+    Serial.println("Motion detected by PIR sensor 1!");
 
     delay(1000);  // Delay
 
-    digitalWrite(pirLedPin, LOW);  // Turn off PIR sensor LED
-    Serial.println("PIR LED turned off");
+    digitalWrite(pirLedPin, LOW);  // Turn off PIR sensor 1 LED
+    Serial.println("PIR sensor 1 LED turned off");
 
-    motionFlag = 0;
+    motionFlag1 = 0;
   }
 
-  if (ultrasonicFlag) {
-    digitalWrite(ultrasonicLedPin, HIGH);  // Turn on ultrasonic sensor LED
-    Serial.println("Ultrasonic sensor condition met!");
-
-   
+  if (motionFlag2) {
+    digitalWrite(pirLedPin2, HIGH);  // Turn on PIR sensor 2 LED
+    Serial.println("Motion detected by PIR sensor 2!");
 
     delay(1000);  // Delay
 
-    digitalWrite(ultrasonicLedPin, LOW);  // Turn off ultrasonic sensor LED
-    Serial.println("Ultrasonic LED turned off");
+    digitalWrite(pirLedPin2, LOW);  // Turn off PIR sensor 2 LED
+    Serial.println("PIR sensor 2 LED turned off");
 
-    ultrasonicFlag = 0;
+    motionFlag2 = 0;
   }
 }
